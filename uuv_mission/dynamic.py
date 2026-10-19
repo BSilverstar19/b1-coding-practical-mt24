@@ -114,6 +114,7 @@ class ClosedLoop:
         positions = np.zeros((T, 2))
         actions = np.zeros(T)
         self.plant.reset_state()
+        previous_error = 0
 
         for t in range(T):
             positions[t] = self.plant.get_position()
