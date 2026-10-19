@@ -1,5 +1,11 @@
 from __future__ import annotations
 from dataclasses import dataclass
+
+# [START] System engineer installs 1/3
+import pandas as pd 
+from pathlib import Path
+# [END] System Engineer installs 1/3
+
 import numpy as np
 import matplotlib.pyplot as plt
 from .terrain import generate_reference_and_limits
@@ -76,7 +82,22 @@ class Mission:
     @classmethod
     def from_csv(cls, file_name: str):
         # You are required to implement this method
-        pass
+
+        # [START] System Engineers implimentation 2/3
+        # Task 1: 'Add a method that returns an instance of the Mission class by extracting data from the mission.csv file.'
+        
+        path = Path(file_name) #Turns file name into path object to work with
+ 
+        mission_data = pd.read_csv(path)  #opens the csv file and reads it into a pandas DataFrame
+
+        #creates a new instance of the Mission class using the data from the DataFrame and returns it
+        return cls(
+            reference=mission_data["reference"].to_numpy(dtype=float), #extracts reference data and converts to NumPy array
+            cave_height=mission_data["cave_height"].to_numpy(dtype=float),
+            cave_depth=mission_data["cave_depth"].to_numpy(dtype=float),
+        )
+
+        # [END] System Engineers implimentation 2/3
 
 
 class ClosedLoop:
@@ -98,6 +119,17 @@ class ClosedLoop:
             positions[t] = self.plant.get_position()
             observation_t = self.plant.get_depth()
             # Call your controller here
+
+            # [START] System Engineers implimentation 3/3
+            # Task 2: 'Implement a closed-loop simulation of the submarine's trajectory based on the mission reference and disturbances.'
+
+            reference_t = mission.reference[t] #gets the reference depth at time t
+            actions[t] = self.controller(reference_t, observation_t, previous_error) #calls the controller function to calculate the action based on the reference depth, observed depth, and previous error
+            previous_error = reference_t - observation_t #updates the previous error for the next iteration
+
+            # [END] System Engineers implimentation 3/3
+
+
             self.plant.transition(actions[t], disturbances[t])
 
         return Trajectory(positions)
